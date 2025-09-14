@@ -4,3 +4,8 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+chrono = "0.4.42"
+eframe = "0.32.3"
+fern = "0.7.1"
+log = "0.4.28"
+rusty_spine = { path = "crates/rusty_spine3.8", features = [ "draw_functions", "mint" ], default-features = false }

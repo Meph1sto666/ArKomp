@@ -1,0 +1,3 @@
+[submodule "crates/rusty_spine3.8"]
+	path = crates/rusty_spine3.8
+	url = https://github.com/jabuwu/rusty_spine3.8.git
