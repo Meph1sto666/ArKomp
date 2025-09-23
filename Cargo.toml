@@ -4,8 +4,27 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-eframe = "0.32.3"
 libloading = "0.8.8"
-log = "0.4.28"
-rusty_spine = { path = "crates/rusty_spine3.8", features = [ "draw_functions", "mint" ], default-features = false }
 shared = { path = "shared/" }
+serde.workspace = true
+eframe.workspace = true
+tokio.workspace = true
+tracing.workspace = true
+
+[dev-dependencies]
+rstest = "0.25.0"
+test-case = "3.3.1"
+
+[workspace]
+members = ["shared"]
+
+[workspace.dependencies]
+eframe = "0.32.3"
+rusty_spine = { path = "crates/rusty_spine3.8", features = [
+	"draw_functions",
+	"mint",
+], default-features = false }
+serde = { version = "1.0.226", features = ["derive"] }
+tokio = { version = "1.47.1", features = ["full"] }
+tracing = "0.1.41"
+tracing-appender = "0.2.3"
