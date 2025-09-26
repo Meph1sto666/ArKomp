@@ -1,12 +1,13 @@
 use tracing::level_filters::LevelFilter;
-use tracing_appender::non_blocking::WorkerGuard;
 use tracing_subscriber::{Layer, layer::SubscriberExt, util::SubscriberInitExt};
 static FILE_GUARD: std::sync::Mutex<
     Option<std::sync::Arc<std::sync::Mutex<tracing_appender::non_blocking::WorkerGuard>>>,
 > = std::sync::Mutex::new(None);
 
-pub fn init_logger()
--> Result<std::sync::Arc<std::sync::Mutex<WorkerGuard>>, Box<dyn std::error::Error>> {
+pub fn init_logger() -> Result<(), Box<dyn std::error::Error>> {
+    if FILE_GUARD.lock().unwrap().is_some() {
+        return Ok(());
+    }
     std::fs::create_dir_all("logs/")?;
     let file_appender = tracing_appender::rolling::daily("./logs/", "arkomp.log");
     let (non_blocking, guard) = tracing_appender::non_blocking(file_appender);
@@ -22,7 +23,7 @@ pub fn init_logger()
         .with_thread_names(true)
         .with_level(true)
         .with_thread_ids(true)
-        .with_filter(LevelFilter::TRACE);
+        .with_filter(LevelFilter::DEBUG);
 
     let stdout_layer = tracing_subscriber::fmt::layer()
         .with_writer(std::io::stdout)
@@ -49,5 +50,5 @@ pub fn init_logger()
     }));
 
     tracing::info!("logger initialised");
-    Ok(guard_arc.clone())
+    Ok(())
 }
