@@ -1,6 +1,9 @@
 use crate::{
-    ipc::commands::{Command, Response},
-    plugin::{PluginRegistry, types::operator_plugin::OperatorPlugin},
+    ipc::{
+        command_context::CommandContext,
+        commands::{ExecCommand, Response},
+    },
+    plugin::types::operator_plugin::OperatorPlugin,
 };
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
@@ -12,11 +15,14 @@ pub struct LoadPluginCommand {
     path: PathBuf,
 }
 
-impl Command for LoadPluginCommand {
-    fn execute(&self, plugin_registry: &mut PluginRegistry) -> Response {
+impl ExecCommand for LoadPluginCommand {
+    fn execute(&self, ctx: &mut CommandContext) -> Response {
         match OperatorPlugin::new(self.path.as_path(), self.name.to_owned()) {
             Ok(plugin) => {
-                plugin_registry.register_plugin(self.name.clone(), Box::new(plugin));
+                ctx.plugin_registry()
+                    .write()
+                    .unwrap()
+                    .register_plugin(self.name.clone(), Box::new(plugin));
                 debug!("Loaded plugin: {}", self.name);
                 Response::Success(format!("Loaded plugin: {}", self.name))
             }

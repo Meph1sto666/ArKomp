@@ -1,6 +1,6 @@
-use crate::{
-    ipc::commands::{Command, Response},
-    plugin::PluginRegistry,
+use crate::ipc::{
+    command_context::CommandContext,
+    commands::{ExecCommand, Response},
 };
 use serde::{Deserialize, Serialize};
 use tracing::debug;
@@ -10,9 +10,14 @@ pub struct UnloadPluginCommand {
     name: String,
 }
 
-impl Command for UnloadPluginCommand {
-    fn execute(&self, plugin_registry: &mut PluginRegistry) -> Response {
-        match plugin_registry.deregister_plugin(&self.name) {
+impl ExecCommand for UnloadPluginCommand {
+    fn execute(&self, ctx: &mut CommandContext) -> Response {
+        match ctx
+            .plugin_registry()
+            .write()
+            .unwrap()
+            .deregister_plugin(&self.name)
+        {
             Ok(plugin) => {
                 debug!("Unloaded plugin: {} / {}", self.name, plugin.name());
                 Response::Success(format!(

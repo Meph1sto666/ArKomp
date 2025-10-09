@@ -1,4 +1,5 @@
 pub mod commands;
+pub mod command_context;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
