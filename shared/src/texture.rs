@@ -1,7 +1,7 @@
 use eframe::egui::{self, TextureFilter, TextureHandle, TextureWrapMode};
-use log::{debug, trace, warn};
 use rusty_spine::atlas::{AtlasFilter, AtlasFormat, AtlasWrap};
 use std::fmt::Debug;
+use tracing::{debug, trace, warn};
 use wgpu::TextureFormat;
 
 pub enum SpineTexture {
