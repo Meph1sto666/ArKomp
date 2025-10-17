@@ -22,18 +22,14 @@ impl ExecCommand for SpawnOperatorCommand {
         };
 
         match build_result {
-            Ok(mut v) => {
-                v.start_animation("Relax");
+            Ok(v) => {
                 ctx.operators()
                     .write()
                     .unwrap()
                     .insert(self.name.clone(), v);
-                Response::Success(format!(
-                    "spawned operator {} at {:?}",
-                    self.name, self.position
-                ))
+                Response::Success(format!("spawned operator {}", self.name))
             }
-            Err(_) => todo!(),
+            Err(_) => Response::Error(format!("failed to spawn operator {}", self.name)),
         }
     }
 }
