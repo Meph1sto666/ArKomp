@@ -29,8 +29,8 @@ impl OperatorPlugin {
         Ok(Self { library, name })
     }
 
-    pub fn build(&self) -> Result<Box<dyn Operator>, Error> {
-        let constructor: libloading::Symbol<fn() -> Box<dyn Operator>> =
+    pub fn build(&self, id: Option<String>) -> Result<Box<dyn Operator>, Error> {
+        let constructor: libloading::Symbol<fn(Option<String>) -> Box<dyn Operator>> =
             match self.library.load_symbol(b"new") {
                 Ok(v) => v,
                 Err(e) => {
@@ -42,7 +42,7 @@ impl OperatorPlugin {
                     Err(e)?
                 }
             };
-        Ok(constructor())
+        Ok(constructor(id))
     }
 }
 

@@ -117,7 +117,7 @@ impl PluginRegistry {
         }
     }
 
-    pub fn register_plugin(&mut self, name: String, plugin: Box<dyn Plugin>) {
+    pub(crate) fn register_plugin(&mut self, name: String, plugin: Box<dyn Plugin>) {
         self.plugins.insert(name, plugin);
     }
 
@@ -128,7 +128,7 @@ impl PluginRegistry {
         })
     }
 
-    pub fn deregister_plugin(&mut self, name: &str) -> Result<Box<dyn Plugin>, Error> {
+    pub(crate) fn deregister_plugin(&mut self, name: &str) -> Result<Box<dyn Plugin>, Error> {
         self.plugins.remove(name).ok_or_else(|| {
             debug!("Plugin {} is not registered", name);
             Error::PluginNotRegistered(format!("Plugin {} is not registered", name))
