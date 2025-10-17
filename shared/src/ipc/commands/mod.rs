@@ -2,14 +2,17 @@ use crate::ipc::{
     Response,
     command_context::CommandContext,
     commands::{
-        load_plugin::LoadPluginCommand, spawn_operatpr::SpawnOperatorCommand,
+        load_plugin::LoadPluginCommand, retreat_operator::RetreatOperatorCommand,
+        schedule_event::ScheduleEventCommand, spawn_operator::SpawnOperatorCommand,
         unload_plugin::UnloadPluginCommand,
     },
 };
 use serde::{Deserialize, Serialize};
 use std::fmt::Debug;
 mod load_plugin;
-mod spawn_operatpr;
+mod retreat_operator;
+mod schedule_event;
+mod spawn_operator;
 mod unload_plugin;
 
 pub trait ExecCommand: std::fmt::Debug + Send + Sync {
@@ -40,6 +43,8 @@ pub enum Command {
     LoadPlugin(LoadPluginCommand),
     UnloadPlugin(UnloadPluginCommand),
     SpawnOperator(SpawnOperatorCommand),
+    ScheduleEvent(ScheduleEventCommand),
+    RetreatOperator(RetreatOperatorCommand),
 }
 
 impl Command {
@@ -48,6 +53,8 @@ impl Command {
             Command::LoadPlugin(cmd) => cmd.execute(ctx),
             Command::UnloadPlugin(cmd) => cmd.execute(ctx),
             Command::SpawnOperator(cmd) => cmd.execute(ctx),
+            Command::ScheduleEvent(cmd) => cmd.execute(ctx),
+            Command::RetreatOperator(cmd) => cmd.execute(ctx),
         }
     }
 

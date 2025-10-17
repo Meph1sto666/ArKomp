@@ -18,7 +18,7 @@ impl ExecCommand for SpawnOperatorCommand {
                 binding.get_plugin(&self.name).unwrap(),
             )
             .unwrap();
-            plugin.build()
+            plugin.build(Some(self.name.clone()))
         };
 
         match build_result {
