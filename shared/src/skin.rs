@@ -1,6 +1,6 @@
-use std::path::PathBuf;
 use eframe::egui;
 use serde::{Deserialize, Serialize};
+use std::path::PathBuf;
 
 pub trait OperatorSkin: std::fmt::Debug {
     fn new(operator_id: &str, skin_id: Option<&str>) -> Result<Self, Error>
@@ -21,6 +21,8 @@ pub enum Error {
     AtlasFileNotFound(String),
     SkeletonFileNotFound(String),
     TextureFileNotFound(String),
+    AnimationNotFound(String),
+    NoActiveAnimation(String),
 }
 
 impl std::fmt::Display for Error {
@@ -29,6 +31,8 @@ impl std::fmt::Display for Error {
             Error::AtlasFileNotFound(e) => write!(f, "Atlas error: {}", e),
             Error::SkeletonFileNotFound(e) => write!(f, "Skeleton error: {}", e),
             Error::TextureFileNotFound(e) => write!(f, "Texture error: {}", e),
+            Error::AnimationNotFound(e) => write!(f, "Animation error: {}", e),
+            Error::NoActiveAnimation(e) => write!(f, "No animation playing: {}", e),
         }
     }
 }
