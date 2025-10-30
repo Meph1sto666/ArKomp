@@ -6,6 +6,7 @@ use crate::{
     plugin::types::operator_plugin::OperatorPlugin,
 };
 use serde::{Deserialize, Serialize};
+use serde_json::json;
 use std::path::PathBuf;
 use tracing::debug;
 
@@ -24,11 +25,22 @@ impl ExecCommand for LoadPluginCommand {
                     .unwrap()
                     .register_plugin(self.name.clone(), Box::new(plugin));
                 debug!("Loaded plugin: {}", self.name);
-                Response::Success(format!("Loaded plugin: {}", self.name))
+                Response::Success(
+                    json!({
+                        "plugin_name": self.name,
+                    })
+                    .to_string(),
+                )
             }
             Err(e) => {
                 debug!("Failed to load plugin: {:?}", e);
-                Response::Error(format!("Failed to load plugin: {:?}", e))
+                Response::Error(
+                    json!({
+                        "plugin_name": self.name,
+                        "reason": e.to_string()
+                    })
+                    .to_string(),
+                )
             }
         }
     }

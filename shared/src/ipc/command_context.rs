@@ -1,6 +1,6 @@
 use crate::{events::Event, operator::Operator, plugin::PluginRegistry};
-use std::sync::mpsc::Sender;
 use std::{collections::HashMap, sync::Arc};
+use tokio::sync::mpsc::Sender;
 pub struct CommandContext {
     operators: Arc<std::sync::RwLock<HashMap<String, Box<dyn Operator>>>>,
     plugin_registry: Arc<std::sync::RwLock<PluginRegistry>>,
@@ -28,7 +28,7 @@ impl CommandContext {
         &self.plugin_registry
     }
 
-    pub fn sender(&self) -> std::sync::mpsc::Sender<Event> {
+    pub fn sender(&self) -> tokio::sync::mpsc::Sender<Event> {
         self.operator_tx.clone()
     }
 }

@@ -6,6 +6,7 @@ use crate::{
     },
 };
 use serde::{Deserialize, Serialize};
+use serde_json::json;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ScheduleEventCommand {
@@ -14,10 +15,25 @@ pub struct ScheduleEventCommand {
 
 impl ExecCommand for ScheduleEventCommand {
     fn execute(&self, ctx: &mut CommandContext) -> Response {
-        ctx.sender().send(self.event.clone()).unwrap();
-        Response::Success(format!(
-            "Scheduled event {}",
-            serde_json::to_string(&self.event).unwrap()
-        ))
+        match ctx
+            .operators()
+            .write()
+            .unwrap()
+            .get_mut(self.event.operator_id())
+        {
+            Some(op) => {
+                return match op.event_handler(self.event.clone()) {
+                    Ok(response) => response,
+                    Err(e) => Response::Error(e.to_string()),
+                };
+            }
+            None => Response::Error(
+                json!({
+                    "operator_id": self.event.operator_id(),
+                    "reason": "Operator not loaded"
+                })
+                .to_string(),
+            ),
+        }
     }
 }

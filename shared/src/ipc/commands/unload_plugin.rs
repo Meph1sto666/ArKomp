@@ -3,6 +3,7 @@ use crate::ipc::{
     commands::{ExecCommand, Response},
 };
 use serde::{Deserialize, Serialize};
+use serde_json::json;
 use tracing::debug;
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -28,7 +29,13 @@ impl ExecCommand for UnloadPluginCommand {
             }
             Err(e) => {
                 debug!("Failed to unload plugin: {}", e);
-                Response::Error(format!("Failed to unload plugin: {}", e))
+                Response::Error(
+                    json!({
+                        "plugin": self.name,
+                        "reason": "Operator not loaded"
+                    })
+                    .to_string(),
+                )
             }
         }
     }
