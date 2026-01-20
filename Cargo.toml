@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-libloading = "0.8.8"
+libloading = "0.9.0"
 shared = { path = "shared/" }
 serde.workspace = true
 eframe.workspace = true
@@ -17,18 +17,15 @@ futures-util = "0.3.31"
 futures = "0.3.31"
 
 [dev-dependencies]
-rstest = "0.25.0"
+rstest = "0.26.1"
 test-case = "3.3.1"
 
 [workspace]
 members = ["shared"]
 
 [workspace.dependencies]
-eframe = "0.32.3"
-rusty_spine = { path = "crates/rusty_spine3.8", features = [
-	"draw_functions",
-	"mint",
-], default-features = false }
+eframe = "0.33.2"
+rusty_spine = { git = "https://github.com/jabuwu/rusty_spine3.8", default-features = false }
 serde = { version = "1.0.226", features = ["derive"] }
 tokio = { version = "1.47.1", features = ["full"] }
 tracing = "0.1.41"
