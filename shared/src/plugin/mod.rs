@@ -15,7 +15,7 @@ pub trait Plugin: fmt::Debug + Send + Sync + Any {
 }
 
 pub fn cast_plugin_to<P: Plugin>(plugin: &dyn Plugin) -> Result<&P, Error> {
-    Ok(plugin.as_any().downcast_ref::<P>().ok_or_else(|| {
+    plugin.as_any().downcast_ref::<P>().ok_or_else(|| {
         debug!(
             "Failed attempted downcast of {:?} into {}",
             plugin,
@@ -26,7 +26,7 @@ pub fn cast_plugin_to<P: Plugin>(plugin: &dyn Plugin) -> Result<&P, Error> {
             plugin,
             std::any::type_name::<P>()
         ))
-    })?)
+    })
 }
 
 #[derive(Debug)]

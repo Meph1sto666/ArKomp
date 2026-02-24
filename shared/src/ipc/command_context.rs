@@ -1,4 +1,4 @@
-use crate::{events::Event, operator::Operator, plugin::PluginRegistry};
+use crate::{ipc::events::Event, operator::Operator, plugin::PluginRegistry};
 use std::{collections::HashMap, sync::Arc};
 use tokio::sync::mpsc::Sender;
 pub struct CommandContext {

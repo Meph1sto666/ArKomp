@@ -1,4 +1,3 @@
-pub mod events;
 pub mod ipc;
 pub mod logging;
 pub mod operator;

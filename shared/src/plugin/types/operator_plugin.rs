@@ -1,5 +1,5 @@
 use crate::{
-    events::Event,
+    ipc::events::Event,
     operator::Operator,
     plugin::{Error, Plugin, PluginLibrary},
 };
@@ -56,10 +56,10 @@ impl OperatorPlugin {
 
         let event_tx_ptr: *const std::ffi::c_void =
             &event_tx as *const _ as *const std::ffi::c_void;
-        Ok(constructor(id_ptr, event_tx_ptr).map_err(|e| {
+        constructor(id_ptr, event_tx_ptr).map_err(|e| {
             error!("{:?}", e);
             Error::Other(e.to_string())
-        })?)
+        })
     }
 }
 

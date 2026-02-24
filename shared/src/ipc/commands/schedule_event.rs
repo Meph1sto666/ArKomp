@@ -1,5 +1,5 @@
 use crate::{
-    events::Event,
+    ipc::events::Event,
     ipc::{
         command_context::CommandContext,
         commands::{ExecCommand, Response},
@@ -10,26 +10,20 @@ use serde_json::json;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ScheduleEventCommand {
+    #[serde(flatten)]
     event: Event,
 }
 
 impl ExecCommand for ScheduleEventCommand {
     fn execute(&self, ctx: &mut CommandContext) -> Response {
-        match ctx
-            .operators()
-            .write()
-            .unwrap()
-            .get_mut(self.event.operator_id())
-        {
-            Some(op) => {
-                return match op.event_handler(self.event.clone()) {
-                    Ok(response) => response,
-                    Err(e) => Response::Error(e.to_string()),
-                };
-            }
+        match ctx.operators().write().unwrap().get_mut(self.event.to()) {
+            Some(op) => match op.event_handler(self.event.clone()) {
+                Ok(response) => response,
+                Err(e) => Response::Error(e.to_string()),
+            },
             None => Response::Error(
                 json!({
-                    "operator_id": self.event.operator_id(),
+                    "to": self.event.to(),
                     "reason": "Operator not loaded"
                 })
                 .to_string(),

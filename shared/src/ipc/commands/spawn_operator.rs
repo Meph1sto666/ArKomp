@@ -60,11 +60,11 @@ impl ExecCommand for SpawnOperatorCommand {
                     .to_string(),
                 )
             }
-            Err(_) => Response::Error(
+            Err(e) => Response::Error(
                 json!({
                     "operator_id": self.name,
                     "plugin": self.plugin,
-                    "reason": "Operator not loaded",
+                    "reason": e.to_string(),
                 })
                 .to_string(),
             ),

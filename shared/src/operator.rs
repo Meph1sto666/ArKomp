@@ -6,7 +6,7 @@ pub trait Operator: std::fmt::Debug + Send + Sync {
     fn start_animation(&mut self, anim: &str) -> Result<(), Error>;
     fn update_animation(&mut self, ctx: &eframe::egui::Context);
     fn load_textures(&mut self, ctx: &eframe::egui::Context);
-    fn event_handler(&mut self, event: crate::events::Event) -> Result<Response, Error>;
+    fn event_handler(&mut self, event: crate::ipc::events::Event) -> Result<Response, Error>;
     fn infos(&self) -> String;
 }
 

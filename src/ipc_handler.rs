@@ -1,8 +1,7 @@
 use futures::{SinkExt, StreamExt};
 use serde_json::json;
 use shared::{
-    events::Event,
-    ipc::{Response, commands::Command},
+    ipc::{Response, SocketMessage, commands::Command, events::Event},
     operator::Operator,
     plugin::PluginRegistry,
 };
@@ -63,6 +62,17 @@ impl WebSocketServer {
                     if writer.send(Message::Text(json.into())).await.is_err() {
                         break;
                     }
+                } else {
+                    writer
+                        .send(Message::Text(
+                            json!({
+                                "test": 1
+                            })
+                            .to_string()
+                            .into(),
+                        ))
+                        .await
+                        .expect("Failed writing to socket");
                 }
             }
         });
@@ -84,16 +94,17 @@ impl WebSocketServer {
         operators: OperatorRegistry,
     ) {
         while let Some(event) = event_rx.recv().await {
-            if let Some(op) = operators.write().unwrap().get_mut(event.operator_id()) {
-                if let Ok(_response) = op.event_handler(event) {                    
-                    // let _ = event_tx.send(response);
-                    // just ignore channel sent events responses for now...
+            if event.to() == "any" {
+                for (_, op) in operators.write().unwrap().iter_mut() {
+                    let _ = op.event_handler(event.clone()); // TODO: add proper error handling
                 }
+            } else if let Some(op) = operators.write().unwrap().get_mut(event.to()) {
+                let _ = op.event_handler(event);
             }
         }
     }
 
-    async fn process_command(&self, cmd: &str) -> Response {
+    async fn process_command(&self, cmd: &str) -> SocketMessage {
         match Command::execute_from_json(
             cmd,
             &mut shared::ipc::command_context::CommandContext::new(
@@ -102,13 +113,14 @@ impl WebSocketServer {
                 self.event_tx.clone(),
             ),
         ) {
-            Ok(response) => response,
+            Ok(response) => response.into(),
             Err(e) => Response::Error(
                 json!({
                     "reason": e
                 })
                 .to_string(),
-            ),
+            )
+            .into(),
         }
     }
 }

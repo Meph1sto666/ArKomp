@@ -9,21 +9,20 @@ pub struct RetreatOperatorCommand {
 
 impl ExecCommand for RetreatOperatorCommand {
     fn execute(&self, ctx: &mut crate::ipc::command_context::CommandContext) -> Response {
-        if let Some(_) = ctx.operators().write().unwrap().remove(&self.name) {
-            Response::Success(
+        match ctx.operators().write().unwrap().remove(&self.name) {
+            Some(_) => Response::Success(
                 json!({
                     "operator_id": self.name,
                 })
                 .to_string(),
-            )
-        } else {
-            Response::Error(
+            ),
+            None => Response::Error(
                 json!({
                     "operator_id": self.name,
                     "reason": "Operator not loaded"
                 })
                 .to_string(),
-            )
+            ),
         }
     }
 }

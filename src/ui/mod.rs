@@ -6,6 +6,7 @@ use shared::{operator::Operator, plugin::PluginRegistry};
 use std::{
     collections::HashMap,
     sync::{Arc, RwLock},
+    time::Duration,
 };
 use tracing::error;
 
@@ -14,6 +15,7 @@ pub struct AppState {
     socket_server: super::ipc_handler::WebSocketServer,
     _server_handle: tokio::task::JoinHandle<()>,
     operators: Arc<RwLock<HashMap<String, Box<dyn Operator>>>>,
+    fps: u8,
 }
 
 impl AppState {
@@ -34,6 +36,7 @@ impl AppState {
             socket_server: web_socket_server,
             _server_handle: server_handle,
             operators: op_reg,
+            fps: 30,
         }
     }
 }
@@ -47,7 +50,7 @@ impl eframe::App for AppState {
                 op.update_animation(ctx);
             }
         });
-        ctx.request_repaint();
+        ctx.request_repaint_after(Duration::from_secs_f32(1.0 / self.fps as f32));
     }
 
     fn clear_color(&self, _visuals: &eframe::egui::Visuals) -> [f32; 4] {
