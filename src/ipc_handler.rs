@@ -8,47 +8,62 @@ use shared::{
 use std::{collections::HashMap, sync::Arc};
 use tokio::net::{TcpListener, TcpStream};
 use tokio_tungstenite::{accept_async, tungstenite::Message};
-use tracing::{error, info};
+use tracing::{debug, error, info, trace};
 
 type OperatorRegistry = Arc<std::sync::RwLock<HashMap<String, Box<dyn Operator>>>>;
 
 #[derive(Debug, Clone)]
 pub struct WebSocketServer {
-    plugins: Arc<std::sync::RwLock<PluginRegistry>>,
-    operators: OperatorRegistry,
-    event_tx: tokio::sync::mpsc::Sender<Event>,
+    pub(crate) plugins: Arc<std::sync::RwLock<PluginRegistry>>,
+    pub(crate) operators: OperatorRegistry,
+    pub(crate) event_tx: tokio::sync::mpsc::Sender<Event>, // server to operators
+    pub(crate) ui_tx: tokio::sync::mpsc::Sender<Event>,    // channel for server to UI
 }
 
 impl WebSocketServer {
     pub fn new(
         plugins: &Arc<std::sync::RwLock<PluginRegistry>>,
         operators: &OperatorRegistry,
+        ui_tx: &tokio::sync::mpsc::Sender<Event>,
     ) -> Self {
         let (event_tx, event_rx) = tokio::sync::mpsc::channel::<Event>(100);
 
         let operators_clone = operators.clone();
+        debug!("started event handler");
         tokio::spawn(Self::event_processor(event_rx, operators_clone));
 
         Self {
             plugins: plugins.clone(),
             operators: operators.clone(),
             event_tx,
+            ui_tx: ui_tx.clone(),
         }
     }
 
-    pub async fn run(&self, addr: &str) -> Result<(), Box<dyn std::error::Error>> {
+    pub async fn run(
+        &self,
+        addr: &str,
+        s_rx: &mut tokio::sync::mpsc::Receiver<Event>,
+    ) -> Result<(), Box<dyn std::error::Error>> {
         let listener = TcpListener::bind(addr).await?;
         info!("WebSocket server running on ws://{}", addr);
 
-        while let Ok((stream, _)) = listener.accept().await {
-            let server = self.clone();
-            tokio::spawn(async move {
-                if let Err(e) = server.handle_client(stream).await {
-                    error!("Client error: {}", e);
-                }
-            });
+        loop {
+            tokio::select! {
+                Some(ui_event) = s_rx.recv() => {
+                    trace!("Received event from UI: {:?}", ui_event);
+                    self.event_tx.send(ui_event).await.unwrap() // forward the event to the event handler
+                },
+
+                Ok((stream, _)) = listener.accept() => {
+                    let server = self.clone();
+                    tokio::spawn(async move {
+                        if let Err(e) = server.handle_client(stream).await {
+                            error!("Client error: {}", e);
+                    }
+                });
+            }}
         }
-        Ok(())
     }
 
     async fn handle_client(&self, stream: TcpStream) -> Result<(), Box<dyn std::error::Error>> {
@@ -111,6 +126,7 @@ impl WebSocketServer {
                 self.operators.clone(),
                 self.plugins.clone(),
                 self.event_tx.clone(),
+                self.ui_tx.clone(),
             ),
         ) {
             Ok(response) => response.into(),

@@ -4,7 +4,8 @@ use crate::ipc::{
     commands::{
         load_plugin::LoadPluginCommand, operator_info::OperatorInfoCommand,
         retreat_operator::RetreatOperatorCommand, schedule_event::ScheduleEventCommand,
-        spawn_operator::SpawnOperatorCommand, unload_plugin::UnloadPluginCommand,
+        set_mouse_passthrough::SetClickthroughCommand, spawn_operator::SpawnOperatorCommand,
+        unload_plugin::UnloadPluginCommand,
     },
 };
 use serde::{Deserialize, Serialize};
@@ -13,6 +14,7 @@ mod load_plugin;
 mod operator_info;
 mod retreat_operator;
 mod schedule_event;
+mod set_mouse_passthrough;
 mod spawn_operator;
 mod unload_plugin;
 
@@ -47,6 +49,7 @@ pub enum Command {
     ScheduleEvent(ScheduleEventCommand),
     RetreatOperator(RetreatOperatorCommand),
     OperatorInfo(OperatorInfoCommand),
+    SetClickthrough(SetClickthroughCommand),
 }
 
 impl Command {
@@ -58,6 +61,7 @@ impl Command {
             Command::ScheduleEvent(cmd) => cmd.execute(ctx),
             Command::RetreatOperator(cmd) => cmd.execute(ctx),
             Command::OperatorInfo(cmd) => cmd.execute(ctx),
+            Command::SetClickthrough(cmd) => cmd.execute(ctx),
         }
     }
 

@@ -37,6 +37,14 @@ pub enum Event {
         position: (f32, f32),
     },
 
+    OnMouseMove {
+        to: String,
+        position: Option<(f32, f32)>,
+    },
+
+    SetMousePassthrough(bool),
+    ShowDebugOverlay(bool),
+
     CustomEvent {
         from: String,
         to: String,
@@ -56,8 +64,12 @@ impl Event {
             Event::SetFacingDirection { to, .. } => to,
             Event::SetPosition { to, .. } => to,
             Event::OnAnimationChange { to, .. } => to,
+            Event::OnMouseMove { to, .. } => to,
+            Event::SetMousePassthrough { .. } => "",
+            Event::ShowDebugOverlay { .. } => "",
         }
     }
+
     pub fn from(&self) -> &str {
         match self {
             Event::OnRetreat { from, .. } => from,
@@ -69,6 +81,9 @@ impl Event {
             Event::SetFacingDirection { .. } => "",
             Event::SetPosition { .. } => "",
             Event::CustomEvent { from, .. } => from,
+            Event::OnMouseMove { .. } => "",
+            Event::SetMousePassthrough { .. } => "",
+            Event::ShowDebugOverlay { .. } => "",
         }
     }
 }
